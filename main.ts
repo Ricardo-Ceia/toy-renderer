@@ -2,16 +2,20 @@ const canvas = document.getElementById("canvas") as HTMLCanvasElement;
 if (!canvas) {
   throw new Error("Canvas not found!");
 }
+
 const ctx = canvas.getContext("2d");
 if (!ctx) {
   throw new Error("Could not get 2D context!");
 }
+
 const Cw = canvas.width;
 const Ch = canvas.height;
 const Vw = 2;
 const Vh = 2;
 const d = 1;
+
 type Vec3 = { x: number; y: number; z: number };
+
 const cube = {
   min: { x: -1, y: -1, z: -1 },
   max: { x: 1, y: 1, z: 1 },
@@ -19,7 +23,9 @@ const cube = {
 };
 
 let rotationAngle = 0;
-const cubeCenter = { x: 0, y: 0, z: 4 }; // Cube center in world space
+const cubeCenter = { x: 0, y: 0, z: 4 };
+
+let zoomLevel = 1.0;
 
 function normalize(v: Vec3): Vec3 {
   const len = Math.sqrt(v.x * v.x + v.y * v.y + v.z * v.z);
@@ -45,9 +51,12 @@ function rotateY(point: Vec3, angle: number): Vec3 {
 }
 
 function canvasToViewport(x: number, y: number): Vec3 {
+  const effectiveVw = Vw / zoomLevel;
+  const effectiveVh = Vh / zoomLevel;
+  
   return {
-    x: (x - Cw / 2) * (Vw / Cw),
-    y: -(y - Ch / 2) * (Vh / Ch),
+    x: (x - Cw / 2) * (effectiveVw / Cw),
+    y: -(y - Ch / 2) * (effectiveVh / Ch),
     z: d
   };
 }
@@ -92,7 +101,6 @@ function getCubeNormal(P: Vec3, cube: {min: Vec3, max: Vec3}, axis: string): Vec
 }
 
 function traceRay(O: Vec3, D: Vec3, angle: number): Vec3 {
-  // Transform ray into cube's local space (inverse rotation around Y axis)
   const localO = subtract(O, cubeCenter);
   const rotatedO = rotateY(localO, -angle);
   const rotatedD = rotateY(D, -angle);
@@ -109,7 +117,6 @@ function traceRay(O: Vec3, D: Vec3, angle: number): Vec3 {
   };
   
   const localNormal = getCubeNormal(P, cube, axis);
-  // Transform normal back to world space
   const worldNormal = rotateY(localNormal, angle);
   
   const lightDir = normalize({ x: -1, y: -1, z: -1 });
@@ -140,7 +147,7 @@ function render() {
   const image = ctx.createImageData(Cw, Ch);
   const buffer = image.data;
   
-  const O = { x: 0, y: 0, z: 0 }; // Camera stays fixed at origin
+  const O = { x: 0, y: 0, z: 0 };
   
   for (let y = 0; y < Ch; y++) {
     for (let x = 0; x < Cw; x++) {
@@ -153,8 +160,15 @@ function render() {
   ctx.putImageData(image, 0, 0);
 }
 
+// Add wheel event listener ONCE, outside the animation loop
+canvas.addEventListener('wheel', (e) => {
+  e.preventDefault();
+  zoomLevel *= e.deltaY > 0 ? 1.1 : 0.9;
+  zoomLevel = Math.max(0.5, Math.min(zoomLevel, 5));
+});
+
 function animate() {
-  rotationAngle += 0.02; // Adjust rotation speed here
+  rotationAngle += 0.02;
   render();
   requestAnimationFrame(animate);
 }
