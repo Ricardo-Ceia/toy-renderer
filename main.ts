@@ -27,7 +27,7 @@ interface Cube {
 }
 
 const mainCube: Cube = {
-  position: { x: 0, y: 0, z: 4 },
+  position: { x: 0, y: 0, z: 10 }, // Moved farther back
   size: 2,
   color: { x: 1, y: 0, z: 0 },
   velocity: { x: 0, y: 0, z: 0 },
@@ -37,7 +37,7 @@ const mainCube: Cube = {
 };
 
 let rotationAngle = 0;
-let zoomLevel = 1.0;
+let cameraDistance = 0; // Camera offset (negative = closer, positive = farther)
 let isExploded = false;
 let fragments: Cube[] = [];
 
@@ -95,25 +95,29 @@ function rotate(p: Vec3, rot: Vec3): Vec3 {
 }
 
 function canvasToViewport(x: number, y: number): Vec3 {
-  const effectiveVw = Vw / zoomLevel;
-  const effectiveVh = Vh / zoomLevel;
-  
   return {
-    x: (x - Cw / 2) * (effectiveVw / Cw),
-    y: -(y - Ch / 2) * (effectiveVh / Ch),
+    x: (x - Cw / 2) * (Vw / Cw),
+    y: -(y - Ch / 2) * (Vh / Ch),
     z: d
   };
 }
 
 function project3D(point: Vec3): { x: number; y: number; z: number } | null {
-  const fov = 600;
-  const z = point.z;
+  // Apply camera distance offset
+  const adjustedPoint = {
+    x: point.x,
+    y: point.y,
+    z: point.z - cameraDistance // Apply zoom by moving camera
+  };
+  
+  const fov = 500;
+  const z = adjustedPoint.z;
   if (z <= 0.1) return null;
   
   const scale = fov / z;
   return {
-    x: point.x * scale + Cw / 2,
-    y: -point.y * scale + Ch / 2,
+    x: adjustedPoint.x * scale + Cw / 2,
+    y: -adjustedPoint.y * scale + Ch / 2,
     z: z
   };
 }
@@ -203,12 +207,12 @@ function drawFloor() {
   const floorColor = '#cccccc';
   const gridColor = '#999999';
   
-  // Floor plane vertices
+  // Floor plane vertices - extended further back
   const floorVertices = [
     { x: -floorSize, y: FLOOR_Y, z: -5 },
     { x: floorSize, y: FLOOR_Y, z: -5 },
-    { x: floorSize, y: FLOOR_Y, z: 20 },
-    { x: -floorSize, y: FLOOR_Y, z: 20 }
+    { x: floorSize, y: FLOOR_Y, z: 30 },
+    { x: -floorSize, y: FLOOR_Y, z: 30 }
   ];
   
   const projectedFloor = floorVertices.map(v => project3D(v));
@@ -230,8 +234,8 @@ function drawFloor() {
     ctx.strokeStyle = gridColor;
     ctx.lineWidth = 1;
     
-    // Horizontal lines
-    for (let z = -5; z <= 20; z += gridSpacing) {
+    // Horizontal lines (along Z axis)
+    for (let z = -5; z <= 30; z += gridSpacing) {
       const p1 = project3D({ x: -floorSize, y: FLOOR_Y, z });
       const p2 = project3D({ x: floorSize, y: FLOOR_Y, z });
       if (p1 && p2) {
@@ -242,10 +246,10 @@ function drawFloor() {
       }
     }
     
-    // Vertical lines
+    // Vertical lines (along X axis)
     for (let x = -floorSize; x <= floorSize; x += gridSpacing) {
       const p1 = project3D({ x, y: FLOOR_Y, z: -5 });
-      const p2 = project3D({ x, y: FLOOR_Y, z: 20 });
+      const p2 = project3D({ x, y: FLOOR_Y, z: 30 });
       if (p1 && p2) {
         ctx.beginPath();
         ctx.moveTo(p1.x, p1.y);
@@ -474,11 +478,19 @@ canvas.addEventListener('click', () => {
   }
 });
 
-// Zoom
+// Zoom with mouse wheel
 canvas.addEventListener('wheel', (e) => {
   e.preventDefault();
-  zoomLevel *= e.deltaY > 0 ? 1.1 : 0.9;
-  zoomLevel = Math.max(0.5, Math.min(zoomLevel, 5));
+  
+  // Adjust camera distance (positive = zoom out, negative = zoom in)
+  if (e.deltaY > 0) {
+    cameraDistance += 0.5; // Zoom out
+  } else {
+    cameraDistance -= 0.5; // Zoom in
+  }
+  
+  // Clamp camera distance
+  cameraDistance = Math.max(-10, Math.min(cameraDistance, 15));
 });
 
 function animate() {
