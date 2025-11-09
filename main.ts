@@ -35,9 +35,9 @@ function canvasToViewport(x: number, y: number): Vec3 {
 function traceRay(origin: Vec3, direction: Vec3): Vec3 {
   // Simple white to blue gradient background
   const t = 0.5 * (direction.y + 1.0);
-  const r = (1 - t) * 1.0 + t * 0.2;
-  const g = (1 - t) * 1.0 + t * 0.8;
-  const b = (1 - t) * 1.0 + t * 0.1;
+  const r = (1 - t) * 1.0 + t * 1;
+  const g = (1 - t) * 1.0 + t * 0.5;
+  const b = (1 - t) * 1.0 + t * 1;
   
   return {
     x: Math.max(0, Math.min(1, r)),
