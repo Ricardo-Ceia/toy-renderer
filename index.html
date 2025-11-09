@@ -4,12 +4,115 @@
     <meta charset="UTF-8">
     <title>Ray Tracer</title>
     <style>
-      body { margin: 0; background: #111; display: flex; justify-content: center; align-items: center; height: 100vh; }
-      canvas { border: 2px solid #444; }
-    </style>
+    body {
+      margin: 0;
+      padding: 20px;
+      background: #222;
+      font-family: Arial, sans-serif;
+      display: flex;
+      gap: 20px;
+      align-items: flex-start;
+    }
+    
+    canvas {
+      border: 1px solid #444;
+      background: white;
+    }
+    
+    .controls {
+      background: #333;
+      padding: 20px;
+      border-radius: 8px;
+      color: white;
+      min-width: 200px;
+    }
+    
+    .slider-group {
+      margin-bottom: 20px;
+    }
+    
+    .slider-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    
+    .slider-group input[type="range"] {
+      width: 100%;
+      margin-bottom: 5px;
+    }
+    
+    .value {
+      font-size: 14px;
+      color: #aaa;
+    }
+    
+    input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      height: 6px;
+      border-radius: 3px;
+      outline: none;
+    }
+    
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      cursor: pointer;
+    }
+    
+    #red {
+      background: linear-gradient(to right, #000, #f00);
+    }
+    
+    #red::-webkit-slider-thumb {
+      background: #f00;
+    }
+    
+    #green {
+      background: linear-gradient(to right, #000, #0f0);
+    }
+    
+    #green::-webkit-slider-thumb {
+      background: #0f0;
+    }
+    
+    #blue {
+      background: linear-gradient(to right, #000, #00f);
+    }
+    
+    #blue::-webkit-slider-thumb {
+      background: #00f;
+    }
+  </style>
   </head>
   <body>
     <canvas id="canvas" width="640" height="480"></canvas>
+    
+    <div class="controls">
+    <h3>Cube Color</h3>
+    
+    <div class="slider-group">
+      <label>Red</label>
+      <input type="range" id="red" min="0" max="255" value="255">
+      <div class="value">Value: <span id="redValue">255</span></div>
+    </div>
+    
+    <div class="slider-group">
+      <label>Green</label>
+      <input type="range" id="green" min="0" max="255" value="0">
+      <div class="value">Value: <span id="greenValue">0</span></div>
+    </div>
+    
+    <div class="slider-group">
+      <label>Blue</label>
+      <input type="range" id="blue" min="0" max="255" value="0">
+      <div class="value">Value: <span id="blueValue">0</span></div>
+    </div>
+  </div>
     <script type="module" src="./main.js"></script>
   </body>
 </html>

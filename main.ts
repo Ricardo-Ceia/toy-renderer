@@ -160,6 +160,35 @@ function render() {
   ctx.putImageData(image, 0, 0);
 }
 
+// Setup color sliders
+const redSlider = document.getElementById("red") as HTMLInputElement;
+const greenSlider = document.getElementById("green") as HTMLInputElement;
+const blueSlider = document.getElementById("blue") as HTMLInputElement;
+
+const redValue = document.getElementById("redValue");
+const greenValue = document.getElementById("greenValue");
+const blueValue = document.getElementById("blueValue");
+
+if (redSlider && greenSlider && blueSlider) {
+  redSlider.addEventListener("input", (e) => {
+    const value = parseInt((e.target as HTMLInputElement).value) / 255;
+    cube.color.x = value;
+    if (redValue) redValue.textContent = Math.round(value * 255).toString();
+  });
+  
+  greenSlider.addEventListener("input", (e) => {
+    const value = parseInt((e.target as HTMLInputElement).value) / 255;
+    cube.color.y = value;
+    if (greenValue) greenValue.textContent = Math.round(value * 255).toString();
+  });
+  
+  blueSlider.addEventListener("input", (e) => {
+    const value = parseInt((e.target as HTMLInputElement).value) / 255;
+    cube.color.z = value;
+    if (blueValue) blueValue.textContent = Math.round(value * 255).toString();
+  });
+}
+
 // Add wheel event listener ONCE, outside the animation loop
 canvas.addEventListener('wheel', (e) => {
   e.preventDefault();
